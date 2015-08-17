@@ -91,7 +91,7 @@ class ModelType(MultiType):
 
         if not isinstance(value, dict):
             raise ConversionError(
-                self.messages['choices'].format(
+                self.messages['use_mapping'].format(
                     self.model_class.__name__,
                     type(value).__name__))
 

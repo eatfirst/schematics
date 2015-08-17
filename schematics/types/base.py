@@ -757,7 +757,7 @@ class GeoPointType(BaseType):
     MESSAGES = {
         'two_dimensional_point': _(u'Value must be a two-dimensional point.'),
         'must_be_float_int': _(u"Both values in point must be float or int."),
-        'touple_list_dicts_only': _(u"GeoPointType can only accept tuples, lists, or dicts."),
+        'tuple_list_dicts_only': _(u"GeoPointType can only accept tuples, lists, or dicts."),
     }
 
     def _mock(self, context=None):
@@ -777,7 +777,7 @@ class GeoPointType(BaseType):
                     not isinstance(value[1], (float, int))):
                 raise ValueError(self.messages['must_be_float_int'])
         else:
-            raise ValueError(self.messages['touple_list_dicts_only'])
+            raise ValueError(self.messages['tuple_list_dicts_only'])
 
         return value
 
