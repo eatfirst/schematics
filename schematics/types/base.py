@@ -10,6 +10,7 @@ import string
 import six
 from six import iteritems
 
+from ..translator import _
 from ..exceptions import (
     StopValidation, ValidationError, ConversionError, MockCreationError
 )
@@ -169,8 +170,8 @@ class BaseType(TypeMeta('BaseTypeBase', (object, ), {})):
     """
 
     MESSAGES = {
-        'required': u"This field is required.",
-        'choices': u"Value must be one of {0}.",
+        'required': _(u"This field is required."),
+        'choices': _(u"Value must be one of {0}."),
     }
 
     def __init__(self, required=False, default=None, serialized_name=None,
@@ -269,7 +270,7 @@ class UUIDType(BaseType):
     """A field that stores a valid UUID value.
     """
     MESSAGES = {
-        'convert': u"Couldn't interpret '{0}' value as UUID.",
+        'convert': _(u"Couldn't interpret '{0}' value as UUID."),
     }
 
     def _mock(self, context=None):
@@ -290,6 +291,9 @@ class UUIDType(BaseType):
 class IPv4Type(BaseType):
 
     """ A field that stores a valid IPv4 address """
+    MESSAGES = {
+        'invalid': _(u"Invalid IPv4 address."),
+    }
 
     def _mock(self, context=None):
         return '.'.join(str(random.randrange(256)) for _ in range(4))
@@ -311,8 +315,7 @@ class IPv4Type(BaseType):
           http://stackoverflow.com/questions/9948833/validate-ip-address-from-list
         """
         if not IPv4Type.valid_ip(value):
-            error_msg = 'Invalid IPv4 address'
-            raise ValidationError(error_msg)
+            raise ValidationError(self.messages['invalid'])
         return True
 
 
@@ -325,10 +328,10 @@ class StringType(BaseType):
     allow_casts = (int, str)
 
     MESSAGES = {
-        'convert': u"Couldn't interpret '{0}' as string.",
-        'max_length': u"String value is too long.",
-        'min_length': u"String value is too short.",
-        'regex': u"String value did not match validation regex.",
+        'convert': _(u"Couldn't interpret '{0}' as string."),
+        'max_length': _(u"String value is too long."),
+        'min_length': _(u"String value is too short."),
+        'regex': _(u"String value did not match validation regex."),
     }
 
     def __init__(self, regex=None, max_length=None, min_length=None, **kwargs):
@@ -378,8 +381,8 @@ class URLType(StringType):
     """
 
     MESSAGES = {
-        'invalid_url': u"Not a well formed URL.",
-        'not_found': u"URL does not exist.",
+        'invalid_url': _(u"Not a well formed URL."),
+        'not_found': _(u"URL does not exist."),
     }
 
     URL_REGEX = re.compile(
@@ -417,7 +420,7 @@ class EmailType(StringType):
     """
 
     MESSAGES = {
-        'email': u"Not a well formed email address."
+        'email': _(u"Not a well formed email address.")
     }
 
     EMAIL_REGEX = re.compile(
@@ -446,9 +449,9 @@ class NumberType(BaseType):
     """
 
     MESSAGES = {
-        'number_coerce': u"Value '{0}' is not {1}.",
-        'number_min': u"{0} value should be greater than {1}.",
-        'number_max': u"{0} value should be less than {1}.",
+        'number_coerce': _(u"Value '{0}' is not {1}."),
+        'number_min': _(u"{0} value should be greater than {1}."),
+        'number_max': _(u"{0} value should be less than {1}."),
     }
 
     def __init__(self, number_class, number_type,
@@ -530,9 +533,9 @@ class DecimalType(BaseType):
     """
 
     MESSAGES = {
-        'number_coerce': "Number '{0}' failed to convert to a decimal.",
-        'number_min': u"Value should be greater than {0}.",
-        'number_max': u"Value should be less than {0}.",
+        'number_coerce': _("Number '{0}' failed to convert to a decimal."),
+        'number_min': _(u"Value should be greater than {0}."),
+        'number_max': _(u"Value should be less than {0}."),
     }
 
     def __init__(self, min_value=None, max_value=None, **kwargs):
@@ -573,8 +576,8 @@ class DecimalType(BaseType):
 class HashType(BaseType):
 
     MESSAGES = {
-        'hash_length': u"Hash value is wrong length.",
-        'hash_hex': u"Hash value is not hexadecimal.",
+        'hash_length': _(u"Hash value is wrong length."),
+        'hash_hex': _(u"Hash value is not hexadecimal."),
     }
 
     def _mock(self, context=None):
@@ -615,6 +618,9 @@ class BooleanType(BaseType):
     + For ``False``: "False", "false", "0"
 
     """
+    MESSAGES = {
+        'must_be_true_false': _(u"Must be either true or false."),
+    }
 
     TRUE_VALUES = ('True', 'true', '1')
     FALSE_VALUES = ('False', 'false', '0')
@@ -633,7 +639,7 @@ class BooleanType(BaseType):
             value = bool(value)
 
         if not isinstance(value, bool):
-            raise ConversionError(u"Must be either true or false.")
+            raise ConversionError(self.messages['must_be_true_false'])
 
         return value
 
@@ -645,7 +651,7 @@ class DateType(BaseType):
 
     SERIALIZED_FORMAT = '%Y-%m-%d'
     MESSAGES = {
-        'parse': u"Could not parse {0}. Should be ISO8601 (YYYY-MM-DD).",
+        'parse': _(u"Could not parse {0}. Should be ISO8601 (YYYY-MM-DD)."),
     }
 
     def __init__(self, **kwargs):
@@ -692,8 +698,8 @@ class DateTimeType(BaseType):
     SERIALIZED_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 
     MESSAGES = {
-        'parse_formats': u'Could not parse {0}. Valid formats: {1}',
-        'parse': u"Could not parse {0}. Should be ISO8601.",
+        'parse_formats': _(u'Could not parse {0}. Valid formats: {1}'),
+        'parse': _(u"Could not parse {0}. Should be ISO8601."),
     }
 
     def __init__(self, formats=None, serialized_format=None, **kwargs):
@@ -748,6 +754,11 @@ class GeoPointType(BaseType):
 
     """A list storing a latitude and longitude.
     """
+    MESSAGES = {
+        'two_dimensional_point': _(u'Value must be a two-dimensional point.'),
+        'must_be_float_int': _(u"Both values in point must be float or int."),
+        'tuple_list_dicts_only': _(u"GeoPointType can only accept tuples, lists, or dicts."),
+    }
 
     def _mock(self, context=None):
         return (random.randrange(-90, 90), random.randrange(-90, 90))
@@ -756,17 +767,17 @@ class GeoPointType(BaseType):
         """Make sure that a geo-value is of type (x, y)
         """
         if not len(value) == 2:
-            raise ValueError('Value must be a two-dimensional point')
+            raise ValueError(self.messages['two_dimensional_point'])
         if isinstance(value, dict):
             for val in value.values():
                 if not isinstance(val, (float, int)):
-                    raise ValueError('Both values in point must be float or int')
+                    raise ValueError(self.messages['must_be_float_int'])
         elif isinstance(value, (list, tuple)):
             if (not isinstance(value[0], (float, int)) or
                     not isinstance(value[1], (float, int))):
-                raise ValueError('Both values in point must be float or int')
+                raise ValueError(self.messages['must_be_float_int'])
         else:
-            raise ValueError('GeoPointType can only accept tuples, lists, or dicts')
+            raise ValueError(self.messages['tuple_list_dicts_only'])
 
         return value
 
@@ -786,13 +797,13 @@ class MultilingualStringType(BaseType):
     allow_casts = (int, str)
 
     MESSAGES = {
-        'convert': u"Couldn't interpret value as string.",
-        'max_length': u"String value in locale {0} is too long.",
-        'min_length': u"String value in locale {0} is too short.",
-        'locale_not_found': u"No requested locale was available.",
-        'no_locale': u"No default or explicit locales were given.",
-        'regex_locale': u"Name of locale {0} did not match validation regex.",
-        'regex_localized': u"String value in locale {0} did not match validation regex.",
+        'convert': _(u"Couldn't interpret value as string."),
+        'max_length': _(u"String value in locale {0} is too long."),
+        'min_length': _(u"String value in locale {0} is too short."),
+        'locale_not_found': _(u"No requested locale was available."),
+        'no_locale': _(u"No default or explicit locales were given."),
+        'regex_locale': _(u"Name of locale {0} did not match validation regex."),
+        'regex_localized': _(u"String value in locale {0} did not match validation regex."),
     }
 
     LOCALE_REGEX = r'^[a-z]{2}(:?_[A-Z]{2})?$'
