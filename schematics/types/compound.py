@@ -140,7 +140,7 @@ class ListType(MultiType):
 
     MESSAGES = {
         'at_least_item': _(u"Please provide at least {0} item."),
-        'mote_than_item': _(u"Please provide no more than {0} item."),
+        'more_than_item': _(u"Please provide no more than {0} item."),
     }
 
     def __init__(self, field, min_size=None, max_size=None, **kwargs):
@@ -193,8 +193,8 @@ class ListType(MultiType):
 
         if self.max_size is not None and list_length > self.max_size:
             message = ({
-                True: self.messages['mote_than_item'],
-                False: self.messages['mote_than_item'],
+                True: self.messages['more_than_item'],
+                False: self.messages['more_than_item'],
             }[self.max_size == 1]).format(self.max_size)
             raise ValidationError(message)
 
