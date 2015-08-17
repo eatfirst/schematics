@@ -10,7 +10,7 @@ import string
 import six
 from six import iteritems
 
-from .. import _
+from ..translator import _
 from ..exceptions import (
     StopValidation, ValidationError, ConversionError, MockCreationError
 )

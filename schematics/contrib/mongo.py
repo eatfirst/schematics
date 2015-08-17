@@ -2,7 +2,7 @@
 a part of the pymongo distribution.
 """
 
-from .. import _
+from ..translator import _
 
 from schematics.types import BaseType
 from schematics.exceptions import ConversionError, ValidationError

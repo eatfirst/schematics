@@ -5,7 +5,7 @@ from __future__ import division
 from collections import Iterable
 import itertools
 
-from .. import _
+from ..translator import _
 from ..exceptions import ValidationError, ConversionError, ModelValidationError, StopValidation
 from ..models import Model
 from ..transforms import export_loop, EMPTY_LIST, EMPTY_DICT
