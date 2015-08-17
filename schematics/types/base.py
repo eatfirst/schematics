@@ -281,7 +281,7 @@ class UUIDType(BaseType):
             try:
                 value = uuid.UUID(value)
             except (AttributeError, TypeError, ValueError):
-                raise ConversionError(self.messages['convert']).format(value)
+                raise ConversionError(self.messages['convert'].format(value))
         return value
 
     def to_primitive(self, value, context=None):
@@ -354,7 +354,7 @@ class StringType(BaseType):
                     value = str(value)
                 value = utf8_decode(value) #unicode(value, 'utf-8')
             else:
-                raise ConversionError(self.messages['convert']).format(value)
+                raise ConversionError(self.messages['convert'].format(value))
 
         return value
 
@@ -557,7 +557,7 @@ class DecimalType(BaseType):
                 value = decimal.Decimal(value)
 
             except (TypeError, decimal.InvalidOperation):
-                raise ConversionError(self.messages['number_coerce']).format(value)
+                raise ConversionError(self.messages['number_coerce'].format(value))
 
         return value
 
@@ -672,7 +672,7 @@ class DateType(BaseType):
         try:
             return datetime.datetime.strptime(value, self.serialized_format).date()
         except (ValueError, TypeError):
-            raise ConversionError(self.messages['parse']).format(value)
+            raise ConversionError(self.messages['parse'].format(value))
 
     def to_primitive(self, value, context=None):
         return value.strftime(self.serialized_format)
@@ -879,10 +879,10 @@ class MultilingualStringType(BaseType):
             len_of_value = len(localized) if localized else 0
 
             if self.max_length is not None and len_of_value > self.max_length:
-                raise ValidationError(self.messages['max_length']).format(locale)
+                raise ValidationError(self.messages['max_length'].format(locale))
 
             if self.min_length is not None and len_of_value < self.min_length:
-                raise ValidationError(self.messages['min_length']).format(locale)
+                raise ValidationError(self.messages['min_length'].format(locale))
 
     def validate_regex(self, value):
         if self.regex is None and self.locale_regex is None:
@@ -891,8 +891,8 @@ class MultilingualStringType(BaseType):
         for locale, localized in value.items():
             if self.regex is not None and self.regex.match(localized) is None:
                 raise ValidationError(
-                    self.messages['regex_localized']).format(locale)
+                    self.messages['regex_localized'].format(locale))
 
             if self.locale_regex is not None and self.locale_regex.match(locale) is None:
                 raise ValidationError(
-                    self.messages['regex_locale']).format(locale)
+                    self.messages['regex_locale'].format(locale))
