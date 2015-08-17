@@ -2,6 +2,8 @@
 a part of the pymongo distribution.
 """
 
+from .. import _
+
 from schematics.types import BaseType
 from schematics.exceptions import ConversionError, ValidationError
 
@@ -23,7 +25,8 @@ class ObjectIdType(BaseType):
     """
 
     MESSAGES = {
-        'convert': u"Couldn't interpret value as an ObjectId.",
+        'convert': _(u"Couldn't interpret value as an ObjectId."),
+        'invalid': _(u"Invalid ObjectId."),
     }
 
     def __init__(self, auto_fill=False, **kwargs):
@@ -46,5 +49,5 @@ class ObjectIdType(BaseType):
             try:
                 value = bson.objectid.ObjectId(unicode(value))
             except Exception:
-                raise ValidationError('Invalid ObjectId')
+                raise ValidationError(self.messages['invalid'])
         return True

@@ -5,10 +5,11 @@ from __future__ import division
 from collections import Iterable
 import itertools
 
+from .. import _
 from ..exceptions import ValidationError, ConversionError, ModelValidationError, StopValidation
 from ..models import Model
 from ..transforms import export_loop, EMPTY_LIST, EMPTY_DICT
-from .base import BaseType, _
+from .base import BaseType
 
 from six import iteritems
 from six import string_types as basestring
@@ -58,6 +59,10 @@ class MultiType(BaseType):
 
 class ModelType(MultiType):
 
+    MESSAGES = {
+        'use_mapping': _(u"Please use a mapping for this field or {0} instance instead of {1}."),
+    }
+
     def __init__(self, model_class, **kwargs):
         self.model_class = model_class
         self.fields = self.model_class.fields
@@ -86,7 +91,7 @@ class ModelType(MultiType):
 
         if not isinstance(value, dict):
             raise ConversionError(
-                _(u'Please use a mapping for this field or {0} instance instead of {1}.').format(
+                self.messages['choices'].format(
                     self.model_class.__name__,
                     type(value).__name__))
 
@@ -133,6 +138,11 @@ class ModelType(MultiType):
 
 class ListType(MultiType):
 
+    MESSAGES = {
+        'at_least_item': _(u"Please provide at least {0} item."),
+        'mote_than_item': _(u"Please provide no more than {0} item."),
+    }
+
     def __init__(self, field, min_size=None, max_size=None, **kwargs):
 
         if not isinstance(field, BaseType):
@@ -176,16 +186,16 @@ class ListType(MultiType):
 
         if self.min_size is not None and list_length < self.min_size:
             message = ({
-                True: _(u'Please provide at least %d item.'),
-                False: _(u'Please provide at least %d items.'),
-            }[self.min_size == 1]) % self.min_size
+                True: self.messages['at_least_item'],
+                False: self.messages['at_least_item'],
+            }[self.min_size == 1]).format(self.min_size)
             raise ValidationError(message)
 
         if self.max_size is not None and list_length > self.max_size:
             message = ({
-                True: _(u'Please provide no more than %d item.'),
-                False: _(u'Please provide no more than %d items.'),
-            }[self.max_size == 1]) % self.max_size
+                True: self.messages['mote_than_item'],
+                False: self.messages['mote_than_item'],
+            }[self.max_size == 1]).format(self.max_size)
             raise ValidationError(message)
 
     def validate_items(self, items):
@@ -236,6 +246,10 @@ class ListType(MultiType):
 
 class DictType(MultiType):
 
+    MESSAGES = {
+        'only_dict': _(u"Only dictionaries may be used in a DictType."),
+    }
+
     def __init__(self, field, coerce_key=None, **kwargs):
         if not isinstance(field, BaseType):
             compound_field = kwargs.pop('compound_field', None)
@@ -259,7 +273,7 @@ class DictType(MultiType):
         value = value or {}
 
         if not isinstance(value, dict):
-            raise ValidationError(_(u'Only dictionaries may be used in a DictType'))
+            raise ValidationError(self.messages['only_dict'])
 
         return dict((self.coerce_key(k), self.field.to_native(v, context))
                     for k, v in iteritems(value))
