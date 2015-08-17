@@ -95,7 +95,7 @@ _last_position_hint = -1
 _next_position_hint = itertools.count()
 
 class Translator():
-    real_translator = lambda x: x
+    real_translator = staticmethod(lambda message, *args, **kwargs: message)
 
     def __call__(self, *args, **kwargs):
         return self.real_translator(*args, **kwargs)
