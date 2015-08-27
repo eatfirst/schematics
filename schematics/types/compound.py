@@ -79,7 +79,7 @@ class ModelType(MultiType):
     def __repr__(self):
         return object.__repr__(self)[:-1] + ' for %s>' % self.model_class
 
-    def to_native(self, value, mapping=None, context=None):
+    def to_native(self, value, mapping=None, context=None, strict=None):
         # We have already checked if the field is required. If it is None it
         # should continue being None
         if mapping is None:
@@ -98,7 +98,7 @@ class ModelType(MultiType):
         # partial submodels now available with import_data (ht ryanolson)
         model = self.model_class()
         return model.import_data(value, mapping=mapping, context=context,
-                                 strict=self.strict)
+                                 strict=strict if strict is not None else self.strict)
 
     def to_primitive(self, model_instance, context=None):
         primitive_data = {}

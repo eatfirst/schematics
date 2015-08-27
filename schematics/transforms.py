@@ -1,6 +1,7 @@
 # encoding=utf-8
 
 import collections
+import inspect
 import itertools
 
 from six import iteritems
@@ -410,10 +411,11 @@ def blacklist(*field_list):
 def convert(cls, instance_or_dict, context=None, partial=True, strict=False,
             mapping=None):
     def field_converter(field, value, mapping=None):
+        extra_payload = dict(strict=strict) if 'strict' in inspect.getargs(field.to_native.__code__).args else {}
         try:
-            return field.to_native(value, mapping=mapping)
+            return field.to_native(value, mapping=mapping, **extra_payload)
         except Exception:
-            return field.to_native(value)
+            return field.to_native(value, **extra_payload)
 #   field_converter = lambda field, value: field.to_native(value)
     data = import_loop(cls, instance_or_dict, field_converter, context=context,
                        partial=partial, strict=strict, mapping=mapping)
