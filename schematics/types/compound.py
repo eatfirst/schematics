@@ -3,6 +3,8 @@
 from __future__ import division
 
 from collections import Iterable
+import importlib
+import inspect
 import itertools
 
 from ..translator import _
@@ -64,8 +66,7 @@ class ModelType(MultiType):
     }
 
     def __init__(self, model_class, **kwargs):
-        self.model_class = model_class
-        self.fields = self.model_class.fields
+        self._model_class = model_class
 
         validators = kwargs.pop("validators", [])
         self.strict = kwargs.pop("strict", True)
@@ -75,6 +76,24 @@ class ModelType(MultiType):
             return model_instance
 
         super(ModelType, self).__init__(validators=[validate_model] + validators, **kwargs)
+
+    @property
+    def model_class(self):
+        if inspect.isclass(self._model_class):
+            return self._model_class
+
+        if not isinstance(self._model_class, basestring):
+            raise RuntimeError('Cannot parse {!r} as a class.'.format(self._model_class))
+
+        data = self._model_class.split('.')
+        package, desired_class = '.'.join(data[:-1]), data[-1]
+        desired_class = getattr(importlib.import_module(package), desired_class)
+        self._model_class = desired_class
+        return desired_class
+
+    @property
+    def fields(self):
+        return self.model_class.fields
 
     def __repr__(self):
         return object.__repr__(self)[:-1] + ' for %s>' % self.model_class
@@ -139,8 +158,8 @@ class ModelType(MultiType):
 class ListType(MultiType):
 
     MESSAGES = {
-        'at_least_item': _(u"Please provide at least {0} item."),
-        'more_than_item': _(u"Please provide no more than {0} item."),
+        'at_least_item': _(u"Please provide at least {0} items."),
+        'more_than_item': _(u"Please provide no more than {0} items."),
     }
 
     def __init__(self, field, min_size=None, max_size=None, **kwargs):
