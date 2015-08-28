@@ -133,7 +133,7 @@ def test_validation_with_size_limits():
         c = Card({"users": []})
         c.validate()
 
-    assert exception.value.messages['users'] == [u'Please provide at least 1 item.']
+    assert exception.value.messages['users'] == [u'Please provide at least 1 items.']
 
     with pytest.raises(ValidationError) as exception:
         c = Card({"users": [User(), User(), User()]})
