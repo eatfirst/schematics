@@ -151,7 +151,9 @@ def export_loop(cls, instance_or_dict, field_converter,
 
     # Translate `role` into `gottago` function
     gottago = wholelist()
-    if hasattr(cls, '_options') and role in cls._options.roles:
+    if callable(role):
+        gottago = role(cls)
+    elif hasattr(cls, '_options') and role in cls._options.roles:
         gottago = cls._options.roles[role]
     elif role and raise_error_on_role:
         error_msg = u'%s Model has no role "%s"'
