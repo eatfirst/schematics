@@ -152,7 +152,7 @@ def export_loop(cls, instance_or_dict, field_converter,
     # Translate `role` into `gottago` function
     gottago = wholelist()
     if callable(role):
-        gottago = role(cls)
+        gottago = role(cls, instance_or_dict)
     elif hasattr(cls, '_options') and role in cls._options.roles:
         gottago = cls._options.roles[role]
     elif role and raise_error_on_role:
