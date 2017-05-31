@@ -41,6 +41,7 @@ def validate(cls, instance_or_dict, partial=False, strict=False, context=None):
                            context=context, partial=partial, strict=strict)
     except ModelConversionError as mce:
         errors = mce.messages
+        data = mce.partial_data
 
     # Check if unknown fields are present
     if strict:
