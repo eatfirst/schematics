@@ -3,10 +3,10 @@
 from __future__ import division
 
 from collections import Iterable
-import importlib
 import inspect
 import itertools
 
+from schematics.utils import import_string
 from ..translator import _
 from ..exceptions import ValidationError, ConversionError, ModelValidationError, StopValidation
 from ..models import Model
@@ -81,15 +81,12 @@ class ModelType(MultiType):
     def model_class(self):
         if inspect.isclass(self._model_class):
             return self._model_class
-
-        if not isinstance(self._model_class, basestring):
-            raise RuntimeError('Cannot parse {!r} as a class.'.format(self._model_class))
-
-        data = self._model_class.split('.')
-        package, desired_class = '.'.join(data[:-1]), data[-1]
-        desired_class = getattr(importlib.import_module(package), desired_class)
-        self._model_class = desired_class
-        return desired_class
+        _model_class = import_string(self._model_class)
+        if inspect.isclass(_model_class):
+            self._model_class = _model_class
+            return self._model_class
+        raise RuntimeError('Imported string could not be interpreted as a class {!r} {!r}'.format(self._model_class,
+                                                                                                  _model_class))
 
     @property
     def fields(self):

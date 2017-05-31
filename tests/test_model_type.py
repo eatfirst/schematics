@@ -153,3 +153,16 @@ def test_export_loop_with_subclassed_model():
 
     native = product.to_native()
     assert 'bucket_name' in native['asset']
+
+
+def test_string_model_path():
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__)))
+
+    class StringTest(Model):
+        string_model = ModelType('test_package.schemas:Internal.Schema')
+
+    a = StringTest(dict(string_model=dict(abc='Abc')))
+    assert a.serialize() == dict(string_model=dict(abc='Abc'))
+    sys.path.pop()
